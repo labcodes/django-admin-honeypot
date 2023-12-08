@@ -1,11 +1,4 @@
 import django
-
-from ipware import get_client_ip
-
-from admin_honeypot.forms import HoneypotLoginForm
-from admin_honeypot.models import LoginAttempt
-from admin_honeypot.signals import honeypot
-
 from django.contrib.admin.sites import AdminSite
 from django.contrib.auth import REDIRECT_FIELD_NAME
 from django.contrib.auth.views import redirect_to_login
@@ -13,6 +6,11 @@ from django.shortcuts import redirect
 from django.urls import reverse
 from django.utils.translation import gettext as _
 from django.views import generic
+from ipware import get_client_ip
+
+from admin_honeypot.forms import HoneypotLoginForm
+from admin_honeypot.models import LoginAttempt
+from admin_honeypot.signals import honeypot
 
 
 class AdminHoneypot(generic.FormView):
@@ -29,19 +27,21 @@ class AdminHoneypot(generic.FormView):
         if request.path != login_url:
             return redirect_to_login(request.get_full_path(), login_url)
 
-        return super(AdminHoneypot, self).dispatch(request, *args, **kwargs)
+        return super().dispatch(request, *args, **kwargs)
 
     def get_form(self, form_class=form_class):
         return form_class(self.request, **self.get_form_kwargs())
 
     def get_context_data(self, **kwargs):
-        context = super(AdminHoneypot, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         context.update({
             **AdminSite().each_context(self.request),
             'app_path': self.request.get_full_path(),
             REDIRECT_FIELD_NAME: reverse('admin_honeypot:index'),
             'title': _('Log in'),
         })
+        context['IS_DJANGO_5_PLUS'] = django.VERSION[:3] >= (5, 0, 0)
+        context['IS_DJANGO_4_2_PLUS'] = django.VERSION[:3] >= (4, 2, 0)
         return context
 
     def form_valid(self, form):
@@ -53,8 +53,8 @@ class AdminHoneypot(generic.FormView):
             username=self.request.POST.get('username'),
             session_key=self.request.session.session_key,
             ip_address=ip_address,
-            user_agent=self.request.META.get('HTTP_USER_AGENT'),
+            user_agent=self.request.headers.get('user-agent'),
             path=self.request.get_full_path(),
         )
         honeypot.send(sender=LoginAttempt, instance=instance, request=self.request)
-        return super(AdminHoneypot, self).form_invalid(form)
+        return super().form_invalid(form)

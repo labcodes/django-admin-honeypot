@@ -1,22 +1,27 @@
 #!/usr/bin/env python
-import sys
-from admin_honeypot import __version__, __description__, __license__
+from admin_honeypot import __description__, __license__, __version__
+
 
 try:
-    from setuptools import setup, find_packages
+    from setuptools import find_packages, setup
 except ImportError:
-    from distutils.core import setup, find_packages
+    from distutils.core import find_packages, setup
 
 setup(
     name='django-admin-honeypot',
     version=__version__,
     description=__description__,
-    long_description=open('./README.rst', 'r').read(),
+    long_description=open('./README.rst', encoding='utf-8').read(),
     classifiers=[
         'Development Status :: 5 - Production/Stable',
         'Framework :: Django',
-        'Framework :: Django :: 2.2',
         'Framework :: Django :: 3.0',
+        'Framework :: Django :: 3.1',
+        'Framework :: Django :: 3.2',
+        'Framework :: Django :: 4.0',
+        'Framework :: Django :: 4.1',
+        'Framework :: Django :: 4.2',
+        'Framework :: Django :: 5.0',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: MIT License',
         'Natural Language :: English',
@@ -27,8 +32,9 @@ setup(
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.10',
         'Topic :: Internet :: WWW/HTTP :: Dynamic Content',
-        ],
+    ],
     keywords='django admin honeypot trap',
     maintainer='Derek Payton',
     maintainer_email='derek.payton@gmail.com',
@@ -40,5 +46,5 @@ setup(
     zip_safe=False,
     install_requires=[
         'django-ipware',
-    ]
+    ],
 )

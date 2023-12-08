@@ -1,5 +1,7 @@
-from admin_honeypot import views
 from django.urls import path, re_path
+
+from admin_honeypot import views
+
 
 app_name = 'admin_honeypot'
 

@@ -1,5 +1,6 @@
 import os
 
+
 PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
 
 DEBUG = True
@@ -11,7 +12,7 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': ':memory:',
-    }
+    },
 }
 
 LANGUAGE_CODE = 'en-us'
@@ -20,7 +21,6 @@ SECRET_KEY = 'local'
 SITE_ID = 1
 TIME_ZONE = 'UTC'
 USE_I18N = True
-USE_L10N = True
 USE_TZ = True
 
 MEDIA_ROOT = os.path.join(PROJECT_ROOT, 'media')

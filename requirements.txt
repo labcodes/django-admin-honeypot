@@ -4,4 +4,7 @@ django-ipware
 pytest
 pytest-cov
 pytest-django
-pytest-pythonpath
+testfixtures
+tox
+pre-commit
+

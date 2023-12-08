@@ -6,6 +6,8 @@
 .coveralls
 .DS_Store
 .tox
+.idea
+.pytest_cache
 __pycache__
 build/
 coverage.xml

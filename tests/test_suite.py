@@ -1,14 +1,11 @@
 import re
-
 from urllib.parse import quote_plus
-
-import django
-import pytest
 
 from django.conf import settings
 from django.core import mail
 from django.test import TestCase
 from django.urls import reverse
+from testfixtures import compare
 
 from admin_honeypot.models import LoginAttempt
 
@@ -40,12 +37,13 @@ class AdminHoneypotTest(TestCase):
         """
 
         admin_html = self.client.get(self.admin_url, follow=True).content.decode('utf-8')
-        honeypot_html = (self.client.get(self.honeypot_url, follow=True).content.decode('utf-8')
+        honeypot_html = (
+            self.client.get(self.honeypot_url, follow=True).content.decode('utf-8')
             # /admin/login/ -> /secret/login/
             .replace(self.honeypot_login_url, self.admin_login_url)
 
             # "/admin/" -> "/secret/"
-            .replace('"{0}"'.format(self.honeypot_url), '"{0}"'.format(self.admin_url))
+            .replace(f'"{self.honeypot_url}"', f'"{self.admin_url}"')
 
             # %2fadmin%2f -> %2fsecret%2f
             .replace(quote_plus(self.honeypot_url), quote_plus(self.admin_url))
@@ -55,8 +53,10 @@ class AdminHoneypotTest(TestCase):
         csrf_re = re.compile(r"(<input [^/>]+ value=['\"])[a-zA-Z0-9]+")
         admin_html = csrf_re.sub(r"\1[']", admin_html)
         honeypot_html = csrf_re.sub(r"\1[']", honeypot_html)
-
-        self.assertEqual(honeypot_html, admin_html)
+        compare(
+            expected=admin_html,
+            actual=honeypot_html,
+        )
 
     def test_create_login_attempt(self):
         """
@@ -64,7 +64,7 @@ class AdminHoneypotTest(TestCase):
         """
         data = {
             'username': 'admin',
-            'password': 'letmein'
+            'password': 'letmein',
         }
         self.client.post(self.honeypot_login_url, data)
         attempt = LoginAttempt.objects.latest('pk')
@@ -75,10 +75,12 @@ class AdminHoneypotTest(TestCase):
         """
         An email is sent to settings.ADMINS
         """
-        self.client.post(self.honeypot_login_url, {
-            'username': 'admin',
-            'password': 'letmein'
-        })
+        self.client.post(
+            self.honeypot_login_url, {
+                'username': 'admin',
+                'password': 'letmein',
+            },
+        )
         # CONSIDER: Is there a better way to do this?
         self.assertTrue(len(mail.outbox) > 0)  # We sent at least one email...
         self.assertIn(settings.ADMINS[0][1], mail.outbox[0].to)  # ...to an admin
@@ -100,5 +102,5 @@ class AdminHoneypotTest(TestCase):
         """
 
         honeypot_html = self.client.get(self.honeypot_url, follow=True).content.decode('utf-8')
-        self.assertNotIn('{0}'.format(self.admin_url), honeypot_html)
-        self.assertNotIn('{0}'.format(self.admin_login_url), honeypot_html)
+        self.assertNotIn(f'{self.admin_url}', honeypot_html)
+        self.assertNotIn(f'{self.admin_login_url}', honeypot_html)
